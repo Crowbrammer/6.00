@@ -1,0 +1,11 @@
+#Write a program that does the following in order:
+
+#Asks the user to enter his/her date of birth.
+
+d_o_b = input('Please enter your date of birth!')
+last_name = input('Please enter your last name')
+
+print('Last name: ' + last_name + ' Date of birth: ' + d_o_b)
+
+Asks the user to enter his/her last name.
+Prints out the user’s last name and date of birth, in that order. 

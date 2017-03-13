@@ -1,0 +1,4 @@
+dict_name = {'hello': }
+
+for k in dict_name.keys():
+    print(str(k) + ': ' + str(dict_name[k]))
