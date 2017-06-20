@@ -1,0 +1,37 @@
+# trigger file - if you've done through part 11 but no stories are popping
+
+#  up, you should edit this file to contain triggers that will fire on current
+
+#  news stories!
+
+
+
+# title trigger named t1
+
+t1 TITLE Trump
+
+# subject trigger named t2
+
+t2 SUBJECT Trump
+
+
+
+# phrase trigger named t3
+
+t3 PHRASE Trump
+
+# composite trigger named t4
+
+t4 AND t2 t3
+
+
+
+t5 PHRASE Comey
+t6 PHRASE Elon
+t7 PHRASE Musk
+t8 PHRASE SpaceX
+t9 PHRASE The Boring Company
+
+# the trigger set contains t1 and t4
+
+ADD t5

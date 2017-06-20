@@ -1,0 +1,3 @@
+path = "Tcl\bin;C:\Program Files (x86)\Google\Chrome\Application;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Users\Choppy\AppData\Local\Programs\Python\Python35-32;C:\Program Files (x86)\Skype\Phone\;C:\Tcl\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Users\Choppy\AppData\Local\Programs\Python\Python35-32;C:\Program Files (x86)\Skype\Phone\;C:\Python34;C:\Users\Choppy\AppData\Local\atom\bin;C:\Python27".replace(";", "\n")
+
+print(path)

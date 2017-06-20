@@ -1,0 +1,29 @@
+Your algorithms should be plain English explanations for the steps your program will take to solve these problems.
+
+Write out your algorithm for Problem 2 here:
+
+Best function:
+	Shift the text
+	Recognize words function:
+		Select text until a space - if it matches a word, go to spot after the space, and select it until just before the next space. If it matches a word, repeat this.
+		If it returns 3 matching words, return True
+		Else return False
+	If Recognize words function, return current text
+	Else return Best function with current text
+Go back to step #2
+
+
+
+Take a sample of the first 20 letters
+Apply a de-shifter of 1
+If any of the letter combos match a real word (not 'a'), then use it
+Else increase the de-shift by 1
+Repeat steps #3-4 until a real word is found
+
+Write out your algorithm for Problem 4 here:
+
+Shift the whole text until a real word pops up
+Mark the starting location of the real word and the current shift into a tuple, into a list
+Shift the remaining text until another real word pops up
+Mark the starting location of the real word and the current shift into a tuple, into a list
+Repeat # 3-4 until all 27 shifts are done
