@@ -31,13 +31,13 @@ class Point(object):
 
 class County(Point):
     weights = pylab.array([1.0] * 14)
-    
+
     # Override Point.distance to use County.weights to decide the
     # significance of each dimension
     def distance(self, other):
         difference = self.getAttrs() - other.getAttrs()
         return sum(County.weights * difference * difference) ** 0.5
-    
+
 class Cluster(object):
     def __init__(self, points, pointType):
         self.points = points
@@ -62,6 +62,8 @@ class Cluster(object):
             return oldCentroid.distance(self.centroid)
         else:
             return 0.0
+    def setPoints(self, points):
+        self.points = points
     def getPoints(self):
         return self.points
     def contains(self, name):
@@ -79,9 +81,20 @@ class Cluster(object):
         for p in self.points:
             result = result + str(p) + ', '
         return result[:-2]
-        
 
-    
+# #
+# def cluster_points(X, mu):
+#     clusters = {}
+#     for x in X:
+#         bestmukey = min([(i[0], np.linalg.norm(x-mu[i[0]])) \
+#                     for i in enumerate(mu)], key=lambda t:t[1])[0]
+#         try:
+#             clusters[bestmukey].append(x)
+#         except KeyError:
+#             clusters[bestmukey] = [x]
+#     return clusters
+
+
 def kmeans(points, k, cutoff, pointType, minIters = 3, maxIters = 100, toPrint = False):
     """ Returns (Cluster list, max dist of any point to its cluster) """
     #Uses random initial centroids
@@ -94,6 +107,7 @@ def kmeans(points, k, cutoff, pointType, minIters = 3, maxIters = 100, toPrint =
     while (biggestChange >= cutoff and numIters < maxIters) or numIters < minIters:
         print "Starting iteration " + str(numIters)
         newClusters = []
+
         for c in clusters:
             newClusters.append([])
         for p in points:
@@ -149,7 +163,7 @@ def readCountyData(fName, numEntries = 14):
         dataList.append(features)
         nameList.append(name)
     return nameList, dataList, maxVals
-    
+
 def buildCountyPoints(fName):
     """
     Given an input filename, reads County values from the file and returns
@@ -168,10 +182,10 @@ def randomPartition(l, p):
     Splits the input list into two partitions, where each element of l is
     in the first partition with probability p and the second one with
     probability (1.0 - p).
-    
+
     l: The list to split
     p: The probability that an element of l will be in the first partition
-    
+
     Returns: a tuple of lists, containing the elements of the first and
     second partitions.
     """
@@ -188,9 +202,9 @@ def getAveIncome(cluster):
     """
     Given a Cluster object, finds the average income field over the members
     of that cluster.
-    
+
     cluster: the Cluster object to check
-    
+
     Returns: a float representing the computed average income value
     """
     tot = 0.0
@@ -219,14 +233,11 @@ def test(points, k = 200, cutoff = 0.1):
     pylab.ylabel('Number of Clusters')
     pylab.show()
 
-        
-points = buildCountyPoints('counties.txt')
-random.seed(123)
-testPoints = random.sample(points, len(points)/10)
+# points = buildCountyPoints('counties.txt')
+# random.seed(123)
+# testPoints = random.sample(points, len(points)/10)
+# test(points)
 
-
-    
-    
 def graphRemovedErr(points, kvals = [25, 50, 75, 100, 125, 150], cutoff = 0.1):
     """
     Should produce graphs of the error in training and holdout point sets, and
@@ -234,8 +245,81 @@ def graphRemovedErr(points, kvals = [25, 50, 75, 100, 125, 150], cutoff = 0.1):
     For details see Problem 1.
     """
 
-    # Your Code Here
 
+    # Helper functions.
+
+    def calcTotalErr(clusters, pointType=County, name="Untitled"):
+        """
+        Should go through each point and aggregate up each squared distance
+        to a running total. Then return the total error of the set.
+        """
+        total_error = 0.0
+        for each_cluster in clusters:
+            for each_county in each_cluster.getPoints():
+                total_error += each_county.distance(each_cluster.getCentroid())**2
+                # print(name + " total_error:", round(total_error, 5) )
+        return round(total_error, 5)
+
+    # Your Code Here
+    training_errors = []
+    holdout_errors = []
+    for each_k in kvals:
+
+        ### Groundwork
+
+        training_set, holdout_set = randomPartition(points, 0.8)
+        training_clusters, training_maxDist = kmeans(points, each_k, cutoff, County)
+
+        ### Formulate the holdout set
+
+        # Get the mean points from eachc cluster from the training set
+        trained_centroids = [mean_point.getCentroid() for mean_point in training_clusters]
+        # For each mean_point, create a cluster with each as its only point... Set each of these mean points as a cluster
+        holdout_clusters = []
+        for p in trained_centroids:
+            holdout_clusters.append(Cluster([p], County))
+
+        # Add the rest of the points to each's closest cluster
+        newClusters = []
+        for c in holdout_clusters:
+            newClusters.append([])
+        for p in holdout_set:
+            smallestDistance = p.distance(holdout_clusters[0].getCentroid())
+            index = 0
+            for i in range(len(holdout_clusters)):
+                distance = p.distance(holdout_clusters[i].getCentroid())
+                if distance < smallestDistance:
+                    smallestDistance = distance
+                    index = i
+            newClusters[index].append(p)
+        for c in xrange(len(newClusters)):
+            holdout_clusters[c].setPoints(newClusters[c])
+
+
+
+        # Check the error at the end
+        training_errors += [calcTotalErr(training_clusters, name="Training")]
+        holdout_errors += [calcTotalErr(holdout_clusters, name="Training")]
+
+        # Graph the comparison.
+
+    pylab.plot(kvals, training_errors, 'ro')
+    pylab.plot(kvals, holdout_errors, 'bo')
+    pylab.xlabel('K - # of Clusters')
+    pylab.ylabel('Total Error of Cluster Set')
+    pylab.figure()
+    pylab.plot(kvals, [holdout_errors[i] / training_errors[i] for i in xrange(len(kvals))])
+    pylab.xlabel('K - # of Clusters')
+    pylab.ylabel('Ratio of Error of Cluster Sets (Holdout/Training)')
+    # print([p for p in holdout_clusters[0].getPoints()])
+    print("holdout_errors:", holdout_errors)
+    print("training_errors:", training_errors)
+    pylab.show()
+
+# points = buildCountyPoints('counties.txt')
+# # random.seed(123)
+# # testPoints = random.sample(points, len(points)/10)
+# graphRemovedErr(points)
 
 def graphPredictionErr(points, dimension, kvals = [25, 50, 75, 100, 125, 150], cutoff = 0.1):
     """
@@ -245,4 +329,3 @@ def graphPredictionErr(points, dimension, kvals = [25, 50, 75, 100, 125, 150], c
     """
 
 	# Your Code Here
-    
